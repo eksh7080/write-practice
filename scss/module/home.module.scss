@@ -9,14 +9,11 @@
   .mainWrap {
     width: 100%;
     max-width: 1200px;
-    background-color: #FFFFFF;
     border-radius: 6px;
     .mainGridContainer {
       display: grid;
       grid-template-columns: repeat(6, 1fr);
       grid-template-rows: repeat(4, 1fr);
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
-
       padding: 60px;
       gap: 20px;
       @media (max-width: 1024px) {
@@ -31,7 +28,7 @@
       }
       a {
         @include L.flex-a-center-gap(1rem);
-        strong,article {
+        strong, article {
           font-size: 2rem;
         }
       }
