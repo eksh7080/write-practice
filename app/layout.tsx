@@ -4,6 +4,7 @@
 import '@/scss/global.scss';
 import { Metadata } from 'next';
 import Header from '@/components/Header';
+import { ReactNode } from 'react';
 
 export const metadata: Metadata = {
   title: '책 필사 타자연습',
@@ -13,7 +14,7 @@ export const metadata: Metadata = {
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode;
+  children: ReactNode;
 }>) {
   return (
     <html lang="ko">

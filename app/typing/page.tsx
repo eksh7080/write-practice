@@ -1,144 +1,239 @@
-'use client'; // 상태 관리와 이벤트 핸들링을 위해 클라이언트 컴포넌트 선언
-
-import { useState } from 'react';
+/**
+ * 설명: 필사하기 페이지
+ * @constructor
+ * **/
+'use client';
+import React, { useState, useMemo, useRef } from 'react';
+import { BookOpen, ChevronLeft, ChevronRight, RotateCcw } from 'lucide-react';
 import styles from 'scss/module/typing.module.scss';
-import { BookOpen } from 'lucide-react';
-
-// src/data/books.ts
-export interface Book {
-  id: number;
-  title: string;
-  author: string;
-  content: string; // 실제 필사할 내용
-  color: string; // 책 표지 색상
-}
-
-const BOOKS: Book[] = [
-  {
-    id: 1,
-    title: '별 헤는 밤',
-    author: '윤동주',
-    content:
-      '계절이 지나가는 하늘에는 가을로 가득 차 있습니다.\n나는 아무 걱정도 없이 가을 속의 별들을 다 헤일 듯합니다.',
-    color: '#e74c3c', // Red
-  },
-  {
-    id: 2,
-    title: '소나기',
-    author: '황순원',
-    content:
-      '소년은 개울가에서 소녀를 보자 곧 윤 초시네 증손녀딸이라는 걸 알 수 있었다.\n소녀는 개울에다 손을 잠그고 물장난을 하고 있는 것이다.',
-    color: '#3498db', // Blue
-  },
-  {
-    id: 3,
-    title: '나의 라임 오렌지나무',
-    author: 'J. M. 바스콘셀로스',
-    content: '누구나 잊지 못할 추억이 있다. 그것은 마치 오래된 앨범을 넘기는 것과 같다.',
-    color: '#f1c40f', // Yellow
-  },
-];
-
-export default function TypingPage() {
-  const [selectedBook, setSelectedBook] = useState<Book | null>(null);
+import BOOKS from 'public/novel/novel.json';
+import { TypingTypeInterface } from '@/interface/typingTypeInterface';
+// 한 페이지당 보여줄 글자 수
+const CHARS_PER_PAGE = 300;
+const TypingPage = () => {
+  const [selectedBook, setSelectedBook] = useState<TypingTypeInterface | null>(null);
   const [typingText, setTypingText] = useState('');
+  const [pageIndex, setPageIndex] = useState(0);
+
+  // UI 상태
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isDraggingOver, setIsDraggingOver] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // 드래그 시작: 책 ID 저장
-  const handleDragStart = (e: React.DragEvent, bookId: number) => {
-    e.dataTransfer.setData('bookId', bookId.toString());
-  };
+  /*** 1. 데이터 계산 로직 ***/
 
-  // 드래그 중인 아이템이 드롭존 위에 있을 때
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault(); // 필수: 드롭 허용
-    setIsDraggingOver(true);
-  };
+  // 전체 페이지 수 계산
+  const totalPages = useMemo(() => {
+    if (!selectedBook) return 0;
+    return Math.ceil(selectedBook.content.length / CHARS_PER_PAGE);
+  }, [selectedBook]);
 
-  // 드래그가 드롭존을 벗어났을 때
-  const handleDragLeave = () => {
-    setIsDraggingOver(false);
-  };
+  // 현재 페이지의 텍스트 슬라이싱
+  const currentPageContent = useMemo(() => {
+    if (!selectedBook) return '';
+    const start = pageIndex * CHARS_PER_PAGE;
+    const end = start + CHARS_PER_PAGE;
+    return selectedBook.content.slice(start, end);
+  }, [selectedBook, pageIndex]);
 
-  // 드롭: 책 데이터 로드
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDraggingOver(false);
+  // 전체 진행률 (%) - (이전 페이지까지 글자 수 + 현재 입력 글자 수)
+  const totalProgress = useMemo(() => {
+    if (!selectedBook || totalPages === 0) return 0;
 
-    const bookId = Number(e.dataTransfer.getData('bookId'));
-    const book = BOOKS.find(b => b.id === bookId);
+    const currentPos = pageIndex * CHARS_PER_PAGE + typingText.length;
+    return Math.min(100, (currentPos / selectedBook.content.length) * 100);
+  }, [selectedBook, pageIndex, typingText, totalPages]);
 
-    if (book) {
-      changeBook(book);
+  // 현재 페이지 정확도 (%)
+  const accuracy = useMemo(() => {
+    if (typingText.length === 0) return 100;
+    let correctCount = 0;
+    const minLength = Math.min(typingText.length, currentPageContent.length);
+    for (let i = 0; i < minLength; i++) {
+      if (typingText[i] === currentPageContent[i]) correctCount++;
+    }
+    return Math.floor((correctCount / typingText.length) * 100);
+  }, [typingText, currentPageContent]);
+
+  /*** 2. 이벤트 핸들러 ***/
+
+  const handleTyping = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const val = e.target.value;
+    // 페이지 글자 수 초과 입력 방지
+    if (val.length > currentPageContent.length) return;
+    setTypingText(val);
+
+    // 페이지 끝까지 쳤을 때 (자동 넘김 0.3초 딜레이)
+    if (val.length === currentPageContent.length) {
+      setTimeout(() => movePage(1), 300);
     }
   };
 
-  // 책 변경 함수 (클릭 및 드롭 공용)
-  const changeBook = (book: Book) => {
+  // 페이지 이동 (이전/다음)
+  const movePage = (direction: number) => {
+    const newPage = pageIndex + direction;
+    if (newPage >= 0 && newPage < totalPages) {
+      setPageIndex(newPage);
+      setTypingText(''); // 페이지 변경 시 입력창 초기화
+      if (textareaRef.current) textareaRef.current.focus();
+    } else if (newPage >= totalPages) {
+      alert('책을 모두 완독하셨습니다! 👏');
+    }
+  };
+
+  // 책 변경
+  const changeBook = (book: TypingTypeInterface) => {
     setSelectedBook(book);
-    setTypingText(''); // 입력창 초기화
+    setTypingText('');
+    setPageIndex(0);
+  };
+
+  // 드래그 앤 드롭
+  const handleDragStart = (e: React.DragEvent, bookId: number) => {
+    e.dataTransfer.setData('bookId', bookId.toString());
+  };
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDraggingOver(true);
+  };
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDraggingOver(false);
+    const bookId = Number(e.dataTransfer.getData('bookId'));
+    const book = BOOKS.find(b => b.id === bookId);
+    if (book) changeBook(book);
+  };
+
+  /*** 3. 렌더링 헬퍼 (실시간 하이라이팅) ***/
+  const renderHighlightedText = () => {
+    return currentPageContent.split('').map((char, index) => {
+      let className = styles.remain;
+      if (index < typingText.length) {
+        className = typingText[index] === char ? styles.correct : styles.wrong;
+      } else if (index === typingText.length) {
+        className = styles.current;
+      }
+      return (
+        <span key={index} className={className}>
+          {char}
+        </span>
+      );
+    });
   };
 
   return (
     <div className={styles.container}>
-      {/* 중앙: 작업 영역 (드롭존) */}
+      {/* 왼쪽: 작업 공간 */}
       <section
         className={`${styles.workspace} ${isDraggingOver ? styles.active : ''}`}
         onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
+        onDragLeave={() => setIsDraggingOver(false)}
         onDrop={handleDrop}
       >
         {selectedBook ? (
           <div className={styles.desk}>
-            {/* 왼쪽: 필사 입력 영역 */}
-            <div className={styles.typingArea}>
-              <h3>필사 노트</h3>
-              <textarea
-                placeholder="오른쪽의 글을 보며 천천히 따라 써보세요..."
-                value={typingText}
-                onChange={e => setTypingText(e.target.value)}
-                autoFocus
-              />
+            {/* 상단 상태바 */}
+            <div className={styles.statusBar}>
+              <div className={styles.statusInfo}>
+                <span>
+                  정확도 <strong>{accuracy}%</strong>
+                </span>
+              </div>
+
+              {/* 페이지 네비게이션 */}
+              <div className={styles.pagination}>
+                <button onClick={() => movePage(-1)} disabled={pageIndex === 0} title="이전 페이지">
+                  <ChevronLeft size={18} />
+                </button>
+                <span>
+                  {pageIndex + 1} / {totalPages}
+                </span>
+                <button
+                  onClick={() => movePage(1)}
+                  disabled={pageIndex >= totalPages - 1 && typingText.length < currentPageContent.length}
+                  title="다음 페이지 (내용을 다 채워야 활성화됩니다)"
+                >
+                  <ChevronRight size={18} />
+                </button>
+              </div>
+
+              {/* 전체 진행률 */}
+              <div className={styles.totalProgressWrapper}>
+                <span className={styles.label}>전체 진행률</span>
+                <div className={styles.progressTrack}>
+                  <div className={styles.progressBar} style={{ width: `${totalProgress}%` }} />
+                </div>
+                <span className={styles.label}>{Math.floor(totalProgress)}%</span>
+              </div>
             </div>
 
-            {/* 오른쪽: 책 뷰어 영역 */}
-            <div className={styles.bookViewer}>
-              <h2>{selectedBook.title}</h2>
-              <p className={styles.author}>{selectedBook.author}</p>
-              <div className={styles.content}>{selectedBook.content}</div>
+            <div className={styles.contentArea}>
+              {/* 입력창 */}
+              <div className={styles.typingArea}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
+                  <h3>필사 노트</h3>
+                  <button
+                    onClick={() => setTypingText('')}
+                    title="현재 페이지 다시 쓰기"
+                    style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#888' }}
+                  >
+                    <RotateCcw size={16} />
+                  </button>
+                </div>
+                <textarea
+                  ref={textareaRef}
+                  value={typingText}
+                  onChange={handleTyping}
+                  placeholder="오른쪽 글을 보며 차분히 입력하세요..."
+                  spellCheck={false}
+                />
+              </div>
+
+              {/* 책 뷰어 */}
+              <div className={styles.bookViewer}>
+                <h2>{selectedBook.title}</h2>
+                <div className={styles.content}>{renderHighlightedText()}</div>
+                {/* 페이지 내 글자수 카운터 */}
+                <div className={styles.pageCounter}>
+                  {typingText.length} / {currentPageContent.length} 자
+                </div>
+              </div>
             </div>
           </div>
         ) : (
-          /* 책 선택 전 안내 화면 */
           <div className={styles.placeholder}>
             <div className={styles.dropZoneHint}>
-              <BookOpen size={48} color="#ccc" />
-              <p>
-                오른쪽 서재에서 책을 꺼내
-                <br />
-                이곳으로 드래그하거나 클릭하세요.
-              </p>
+              <BookOpen size={48} color="#555" />
+              <p>서재에서 책을 꺼내오세요.</p>
             </div>
           </div>
         )}
       </section>
 
-      {/* 오른쪽: 서재 (책 리스트) */}
-      <aside className={styles.bookshelf}>
-        <h3>MY LIBRARY</h3>
-        {BOOKS.map(book => (
-          <div
-            key={book.id}
-            className={styles.bookItem}
-            style={{ backgroundColor: book.color }}
-            draggable
-            onDragStart={e => handleDragStart(e, book.id)}
-            onClick={() => changeBook(book)} // 클릭으로도 선택 가능하게 UX 보완
-          >
-            {book.title}
-          </div>
-        ))}
+      {/* 오른쪽: 슬라이딩 서재 */}
+      <aside className={`${styles.bookshelfWrapper} ${!isSidebarOpen ? styles.closed : ''}`}>
+        <button className={styles.toggleBtn} onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
+          <ChevronRight />
+        </button>
+
+        <div className={styles.bookshelf}>
+          <h3>MY LIBRARY</h3>
+          {BOOKS.map(book => (
+            <div
+              key={book.id}
+              className={styles.bookItem}
+              draggable
+              onDragStart={e => handleDragStart(e, book.id)}
+              onClick={() => changeBook(book)}
+              title={book.title}
+            >
+              <span>{book.title}</span>
+            </div>
+          ))}
+        </div>
       </aside>
     </div>
   );
-}
+};
+
+export default TypingPage;

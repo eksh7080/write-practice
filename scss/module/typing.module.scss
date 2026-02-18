@@ -1,137 +1,327 @@
-// src/app/typing/typing.module.scss
+@charset "UTF-8";
+@use 'scss/layout' as L;
+
 .container {
-	display: flex;
-	height: calc(100vh - 60px); // 헤더 높이 제외
-	background-color: #f0f2f5;
-	overflow: hidden;
-}
+  display: flex;
+  height: calc(100vh - 60px);
+  background-color: #f5f5f7;
+  overflow: hidden;
+  position: relative;
 
-// 왼쪽: 메인 작업 공간 (드롭 존)
-.workspace {
-	flex: 1;
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	padding: 3rem;
-	transition: background-color 0.3s;
+  /* 왼쪽: 메인 작업 공간 */
+  .workspace {
+    @include L.flex-a-j-center;
+    flex: 1;
+    padding: 3rem;
+    transition: background-color 0.3s;
 
-	&.active {
-		background-color: #e8f0fe; // 드래그해서 책을 가져왔을 때 하이라이트
-	}
+    &.active {
+      background-color: #e8f0fe;
+    }
 
-	// 책이 선택되지 않았을 때 안내 문구
-	.placeholder {
-		text-align: center;
-		color: #888;
+    /* 책 선택 전 안내 문구 */
+    .placeholder {
+      .dropZoneHint {
+        @include L.flex-a-center-column;
+        @include L.flex-a-j-center;
+        border: 2px dashed #bbb;
+        padding: 4rem;
+        border-radius: 20px;
+        background-color: rgba(255, 255, 255, 0.5);
+        color: #888;
 
-		p {
-			font-size: 1.2rem;
-			margin-top: 1rem;
-		}
+        p {
+          margin-top: 1.5rem;
+          line-height: 1.6;
+          text-align: center;
+        }
+      }
+    }
 
-		.dropZoneHint {
-			border: 2px dashed #ccc;
-			padding: 3rem;
-			border-radius: 20px;
-		}
-	}
+    /* 책 선택 후 작업 데스크 */
+    .desk {
+      @include L.flex-column;
+      @include L.wh100;
+      max-width: 1200px;
+      gap: 1.5rem;
+      animation: fadeIn 0.5s ease-out;
 
-	// 책이 선택되었을 때: [입력창 | 책 뷰어]
-	.desk {
-		display: flex;
-		width: 100%;
-		max-width: 1200px;
-		height: 100%;
-		gap: 2rem;
-		animation: fadeIn 0.5s ease-out;
+      /* 상단 상태바 */
+      .statusBar {
+        @include L.flex-a-center-j-between;
+        background: white;
+        padding: 0.8rem 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        height: 60px;
 
-		.typingArea, .bookViewer {
-			flex: 1;
-			background: white;
-			border-radius: 12px;
-			padding: 2rem;
-			box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-			display: flex;
-			flex-direction: column;
-		}
+        /* 1. 왼쪽: 정보 */
+        .statusInfo {
+          @include L.flex-a-center-gap(1rem);
+          font-size: 0.95rem;
+          color: #555;
+          min-width: 200px;
 
-		// 왼쪽: 필사 입력창
-		.typingArea {
-			h3 { margin-bottom: 1rem; color: #555; }
-			textarea {
-				flex: 1;
-				width: 100%;
-				border: 1px solid #ddd;
-				border-radius: 8px;
-				padding: 1rem;
-				font-size: 1.1rem;
-				line-height: 1.6;
-				resize: none;
-				outline: none;
-				&:focus { border-color: #333; }
-			}
-		}
+          strong {
+            color: #333;
+            font-weight: 700;
+          }
+        }
 
-		// 오른쪽: 책 내용 뷰어
-		.bookViewer {
-			background-color: #fff9e6; // 종이 질감 색상
-			h2 { margin-bottom: 0.5rem; }
-			.author { font-size: 0.9rem; color: #666; margin-bottom: 1.5rem; }
-			.content {
-				font-size: 1.2rem;
-				line-height: 1.8;
-				white-space: pre-wrap; // 줄바꿈 보존
-				font-family: 'Times New Roman', serif;
-			}
-		}
-	}
-}
+        /* 2. 중앙: 페이지 네비게이션 */
+        .pagination {
+          @include L.flex-a-center-gap(1.5rem);
 
-// 오른쪽: 서재 (책장)
-.bookshelf {
-	width: 320px;
-	background-color: #3e2723; // 짙은 갈색 나무 느낌
-	padding: 2rem 1.5rem;
-	overflow-y: auto;
-	box-shadow: -4px 0 10px rgba(0,0,0,0.1);
-	display: flex;
-	flex-direction: column;
-	gap: 1.5rem;
+          button {
+            @include L.flex-a-j-center;
+            width: 32px;
+            height: 32px;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 50%;
+            cursor: pointer;
+            color: #555;
+            transition: all 0.2s;
 
-	h3 {
-		color: #fff;
-		margin-bottom: 1rem;
-		text-align: center;
-		border-bottom: 1px solid rgba(255,255,255,0.2);
-		padding-bottom: 10px;
-	}
+            &:hover:not(:disabled) {
+              background-color: #333;
+              border-color: #333;
+              color: white;
+            }
 
-	.bookItem {
-		height: 50px; // 책등 높이
-		border-radius: 4px;
-		color: white;
-		display: flex;
-		align-items: center;
-		padding: 0 1rem;
-		cursor: grab;
-		transition: transform 0.2s, width 0.2s;
-		font-weight: 600;
-		font-size: 0.9rem;
-		box-shadow: inset 3px 0 10px rgba(0,0,0,0.2); // 입체감
-		position: relative;
+            &:disabled {
+              opacity: 0.3;
+              cursor: not-allowed;
+            }
+          }
 
-		&:hover {
-			transform: translateX(-10px); // 책을 뺄 때 나오는 효과
-			width: calc(100% + 10px);
-		}
+          span {
+            font-family: monospace;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #333;
+            min-width: 80px;
+            text-align: center;
+          }
+        }
 
-		&:active {
-			cursor: grabbing;
-		}
-	}
+        /* 3. 오른쪽: 전체 진행률 바 */
+        .totalProgressWrapper {
+          @include L.flex-a-center-gap(1rem);
+          min-width: 200px;
+          justify-content: flex-end;
+
+          .label {
+            font-size: 0.8rem;
+            color: #888;
+            white-space: nowrap;
+          }
+
+          .progressTrack {
+            width: 120px;
+            height: 6px;
+            background-color: #eee;
+            border-radius: 3px;
+            overflow: hidden;
+
+            .progressBar {
+              height: 100%;
+              background-color: #3498db;
+              transition: width 0.3s ease;
+            }
+          }
+        }
+      }
+
+      /* 하단 콘텐츠 영역 */
+      .contentArea {
+        @include L.flex-a-stretch;
+        flex: 1;
+        gap: 2rem;
+        min-height: 0;
+
+        .typingArea,
+        .bookViewer {
+          @include L.flex-column;
+          flex: 1;
+          background: white;
+          border-radius: 12px;
+          padding: 2rem;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+          overflow: hidden;
+
+          h3, h2 {
+            margin-bottom: 1rem;
+            color: #333;
+            font-size: 1.2rem;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 0.5rem;
+          }
+        }
+
+        /* 왼쪽: 입력창 */
+        .typingArea {
+          textarea {
+            @include L.wh100;
+            flex: 1;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 1.5rem;
+            font-size: 1.1rem;
+            line-height: 1.8;
+            resize: none;
+            outline: none;
+            font-family: monospace;
+
+            &:focus {
+              border-color: #333;
+            }
+          }
+        }
+
+        /* 오른쪽: 책 뷰어 */
+        .bookViewer {
+          background-color: #fdfbf7;
+          position: relative;
+
+          .content {
+            flex: 1;
+            font-size: 1.1rem;
+            line-height: 1.8;
+            white-space: pre-wrap;
+            overflow-y: auto;
+            font-family: monospace;
+            padding-right: 10px;
+
+            span {
+              &.correct { color: #27ae60; }
+              &.wrong { color: #c0392b; text-decoration: underline; }
+              &.current { background-color: #333; color: #fff; }
+              &.remain { color: #aaa; }
+            }
+          }
+
+          .pageCounter {
+            @include L.position-absolute-bottom-right(1rem, 1.5rem);
+            font-size: 0.85rem;
+            color: #aaa;
+            font-family: monospace;
+            background-color: rgba(255,255,255,0.8);
+            padding: 2px 6px;
+            border-radius: 4px;
+          }
+        }
+      }
+    }
+  }
+
+  /* 오른쪽: 서재 영역 Wrapper */
+  .bookshelfWrapper {
+    position: relative;
+    display: flex;
+    transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    z-index: 10;
+
+    &.closed {
+      transform: translateX(180px);
+
+      .toggleBtn {
+        transform: translateX(-100%) rotate(180deg);
+        border-radius: 8px 0 0 8px;
+      }
+    }
+
+    .toggleBtn {
+      @include L.flex-a-j-center;
+      @include L.position-absolute-top-left(50%, 0);
+      transform: translate(-100%, -50%);
+      width: 32px;
+      height: 60px;
+      background-color: #3e2723;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 8px 0 0 8px;
+
+      &:hover {
+        background-color: #5d4a3f;
+      }
+    }
+
+    /* 책장 디자인 */
+    .bookshelf {
+      @include L.flex-column;
+      width: 180px;
+      background-color: #e0e0e0;
+      padding: 1.5rem 1rem;
+      overflow-y: auto;
+      border-left: 1px solid #ccc;
+      gap: 0.5rem;
+
+      h3 {
+        color: #333;
+        margin-bottom: 1rem;
+        text-align: center;
+        font-size: 0.85rem;
+        font-weight: 700;
+        border-bottom: 2px solid #333;
+        padding-bottom: 0.5rem;
+      }
+
+      /* 개별 책 (보더 디자인) */
+      .bookItem {
+        @include L.flex-a-j-center;
+        height: 100px;
+        width: 100%;
+        background-color: #fff;
+        border: 1px solid #333;
+        border-left: 5px double #333;
+        border-radius: 2px 5px 5px 2px;
+        cursor: grab;
+        transition: transform 0.2s, box-shadow 0.2s;
+        position: relative;
+
+        span {
+          writing-mode: vertical-rl;
+          text-orientation: mixed;
+          font-size: 0.85rem;
+          font-weight: 600;
+          color: #333;
+          letter-spacing: 2px;
+        }
+
+        &::before {
+          content: '';
+          @include L.position-absolute-top-left(10px, 6px);
+          width: calc(100% - 12px);
+          height: 1px;
+          background-color: #ccc;
+        }
+
+        &::after {
+          content: '';
+          @include L.position-absolute-bottom-left(10px, 6px);
+          width: calc(100% - 12px);
+          height: 1px;
+          background-color: #ccc;
+        }
+
+        &:hover {
+          transform: translateX(-15px);
+          box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.1);
+          z-index: 5;
+          background-color: #fafafa;
+        }
+
+        &:active {
+          cursor: grabbing;
+        }
+      }
+    }
+  }
 }
 
 @keyframes fadeIn {
-	from { opacity: 0; transform: translateY(10px); }
-	to { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
