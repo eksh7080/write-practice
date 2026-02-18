@@ -16,7 +16,7 @@ const Header = () => {
       </nav>
       {/* 오른쪽: 프로필 아이콘 */}
       <div className={styles.profile}>
-        <UserCircle size={28} />
+        <UserCircle size={32} />
       </div>
     </header>
   );
