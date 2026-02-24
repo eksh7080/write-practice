@@ -3,8 +3,8 @@
  * **/
 import '@/scss/global.scss';
 import { Metadata } from 'next';
-import Header from '@/components/Header';
 import { ReactNode } from 'react';
+import Header from '@/components/Header';
 
 export const metadata: Metadata = {
   title: '책 필사 타자연습',
