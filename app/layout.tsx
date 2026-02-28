@@ -4,7 +4,14 @@
 import '@/scss/global.scss';
 import { Metadata } from 'next';
 import { ReactNode } from 'react';
-import Header from '@/components/Header';
+import { Noto_Sans_KR } from 'next/font/google';
+
+const notoSansKr = Noto_Sans_KR({
+  weight: ['400', '600', '800'],
+  subsets: ['latin'],
+  variable: '--font-noto-sans',
+  display: 'swap',
+});
 
 export const metadata: Metadata = {
   title: '책 필사 타자연습',
@@ -17,9 +24,9 @@ export default function RootLayout({
   children: ReactNode;
 }>) {
   return (
-    <html lang="ko">
-      <body>
-        <Header />
+    <html lang="ko" className={notoSansKr.variable}>
+      <body style={{ fontFamily: 'var(--font-noto-sans), sans-serif' }}>
+        {/*<Header />*/}
         {children}
       </body>
     </html>
