@@ -8,46 +8,75 @@ import styles from 'scss/module/typing.module.scss';
 import BOOKS from 'public/novel/novel.json';
 import { TypingTypeInterface } from '@/interface/typingTypeInterface';
 
-// 한 페이지당 보여줄 글자 수
-const CHARS_PER_PAGE = 300;
+// 시니어 타겟을 위해 가로폭을 고려하여 한 줄에 표시될 최대 글자 수 지정 (자동 줄바꿈 방지)
+const CHARS_PER_LINE = 32;
+const CHARS_PER_PAGE = 350;
 
 export default function Home() {
   const [selectedBook, setSelectedBook] = useState<TypingTypeInterface>(BOOKS[0]);
   const [typingText, setTypingText] = useState('');
   const [pageIndex, setPageIndex] = useState(0);
 
-  // 폰트 사이즈 상태
-  const [fontSizeRem, setFontSizeRem] = useState(1.5);
-
-  // ✨ 책 목록 드롭다운 열림/닫힘 상태
+  const [fontSizeRem, setFontSizeRem] = useState(1.4);
   const [isBookListOpen, setIsBookListOpen] = useState(false);
-
   const [isFocused, setIsFocused] = useState(false);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // ✨ textareaRef -> inputRef 로 변경
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (textareaRef.current) {
-      textareaRef.current.focus();
-    }
+    if (inputRef.current) inputRef.current.focus();
   }, [selectedBook, pageIndex]);
 
-  /*** 1. 데이터 계산 로직 ***/
-  const totalPages = useMemo(() => {
-    return Math.ceil(selectedBook.content.length / CHARS_PER_PAGE);
-  }, [selectedBook]);
+  /*** 1. 데이터 계산 및 문단 자르기 로직 ***/
+  const totalPages = useMemo(() => Math.ceil(selectedBook.content.length / CHARS_PER_PAGE), [selectedBook]);
 
+  console.log(totalPages, '토탈 페이지');
   const currentPageContent = useMemo(() => {
     const start = pageIndex * CHARS_PER_PAGE;
-    const end = start + CHARS_PER_PAGE;
-    return selectedBook.content.slice(start, end);
+
+    const result = selectedBook.content.slice(start, start + CHARS_PER_PAGE).split('.');
+    console.log(result, '결과');
+    let str = '';
+
+    const arr = [];
+
+    for (let i = 0; i < result.length; i++) {
+      str += result[i] + '.\n';
+      arr.push(result[i] + '.\n');
+    }
+
+    console.log(arr, '배열');
+
+    return arr;
+
+    // return selectedBook.content.slice(start, start + CHARS_PER_PAGE);
+
+    // return str.slice(start, start + CHARS_PER_PAGE);
   }, [selectedBook, pageIndex]);
 
-  const nextPageContent = useMemo(() => {
-    if (pageIndex + 1 >= totalPages) return '';
-    const start = (pageIndex + 1) * CHARS_PER_PAGE;
-    const end = start + CHARS_PER_PAGE;
-    return selectedBook.content.slice(start, end);
-  }, [selectedBook, pageIndex, totalPages]);
+  console.log(currentPageContent, '현재 텍스트');
+  const lines = useMemo(() => {
+    const result: string[] = [];
+    let currentLine = '';
+
+    for (let i = 0; i < currentPageContent.length; i++) {
+      const char = currentPageContent[i];
+      if (char === '\n') {
+        if (currentLine) result.push(currentLine);
+        result.push('\n');
+        currentLine = '';
+      } else {
+        currentLine += char;
+        if (currentLine.length === CHARS_PER_LINE) {
+          result.push(currentLine);
+          currentLine = '';
+        }
+      }
+    }
+    if (currentLine) result.push(currentLine);
+    return result;
+  }, [currentPageContent]);
 
   const totalProgress = useMemo(() => {
     if (totalPages === 0) return 0;
@@ -55,13 +84,47 @@ export default function Home() {
     return Math.min(100, (currentPos / selectedBook.content.length) * 100);
   }, [selectedBook, pageIndex, typingText, totalPages]);
 
-  /*** 2. 이벤트 핸들러 ***/
-  const handleTyping = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const val = e.target.value;
-    if (val.length > currentPageContent.length) return;
-    setTypingText(val);
+  /*** 2. 완벽한 타자 제어 이벤트 핸들러 (Input용) ***/
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Backspace' || e.key.includes('Arrow')) return;
 
-    if (val.length === currentPageContent.length) {
+    const expectedChar = currentPageContent[typingText.length];
+
+    // ✨ Input의 한계 극복: 정답이 줄바꿈(\n)일 경우 수동으로 추가 처리
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (expectedChar === '\n') {
+        const newText = typingText + '\n';
+        setTypingText(newText);
+
+        // 페이지 완성 체크
+        if (newText.length === currentPageContent.length) {
+          setTimeout(() => moveNextPage(), 500);
+        }
+      }
+    } else if (expectedChar === '\n') {
+      // 정답이 줄바꿈(\n)인데 다른 키를 치는 것 방지 (반드시 엔터를 쳐야만 넘어가도록)
+      e.preventDefault();
+    }
+  };
+
+  const handleTyping = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    let newText = '';
+
+    // ✨ Input은 \n을 공백으로 뭉개버리므로 원문을 대조하여 복원
+    for (let i = 0; i < val.length; i++) {
+      if (currentPageContent[i] === '\n') {
+        newText += '\n';
+      } else {
+        newText += val[i];
+      }
+    }
+
+    if (newText.length > currentPageContent.length) return;
+    setTypingText(newText);
+
+    if (newText.length === currentPageContent.length) {
       setTimeout(() => moveNextPage(), 500);
     }
   };
@@ -70,7 +133,7 @@ export default function Home() {
     if (pageIndex + 1 < totalPages) {
       setPageIndex(pageIndex + 1);
       setTypingText('');
-      if (textareaRef.current) textareaRef.current.focus();
+      if (inputRef.current) inputRef.current.focus();
     } else {
       alert('책을 마지막 장까지 모두 쓰셨습니다! 정말 고생하셨습니다. 🎉');
       setPageIndex(0);
@@ -78,112 +141,84 @@ export default function Home() {
     }
   };
 
-  const handleZoomIn = () => {
-    setFontSizeRem(prev => Math.min(prev + 0.2, 2.5));
-  };
-
-  const handleZoomOut = () => {
-    setFontSizeRem(prev => Math.max(prev - 0.2, 1.1));
-  };
-
-  // ✨ 책 변경 시 호출
   const changeBook = (book: TypingTypeInterface) => {
     setSelectedBook(book);
     setTypingText('');
     setPageIndex(0);
   };
 
-  /*** 3. 렌더링 헬퍼 ***/
-  const renderHighlightedText = () => {
-    const typedElements = typingText.split('').map((char, index) => {
-      const isCorrect = char === currentPageContent[index];
-      return (
-        <span key={`typed-${index}`} className={isCorrect ? styles.typed : styles.wrong}>
-          {char}
-        </span>
-      );
-    });
+  /*** 3. 위아래 대칭 렌더링 헬퍼 ***/
+  const renderLines = () => {
+    let currentTypedIndex = 0;
 
-    const remainingText = currentPageContent.slice(typingText.length);
-    const remainingElements = remainingText.split('').map((char, index) => {
-      const actualIndex = typingText.length + index;
+    return lines.map((lineText, lineIdx) => {
+      const lineLen = lineText.length;
+      const typedPart = typingText.slice(currentTypedIndex, currentTypedIndex + lineLen);
+      const startIndex = currentTypedIndex;
+      currentTypedIndex += lineLen;
 
-      if (index === 0) {
+      if (lineText === '\n') {
+        const isCurrent = typingText.length === startIndex;
         return (
-          <span key={`remain-${actualIndex}`} className={styles.current}>
-            {char}
-          </span>
+          <div key={lineIdx} className={styles.emptyLine}>
+            {isCurrent && <span className={styles.enterHint}>↵ 엔터(Enter) 키를 누르세요</span>}
+          </div>
         );
       }
+
       return (
-        <span key={`remain-${actualIndex}`} className={styles.remain}>
-          {char}
-        </span>
+        <div key={lineIdx} className={styles.linePair}>
+          <div className={styles.originalLine}>{lineText}</div>
+
+          <div className={styles.typedLine}>
+            {lineText.split('').map((char, charIdx) => {
+              const typedChar = typedPart[charIdx];
+              const isCurrent = typingText.length === startIndex + charIdx;
+
+              return (
+                <span key={charIdx} className={`${styles.char} ${isCurrent ? styles.current : ''}`}>
+                  {!typedChar ? (
+                    <span style={{ opacity: 0 }}>{char === ' ' ? '\u00A0' : char}</span>
+                  ) : (
+                    <span className={typedChar === char ? styles.correct : styles.wrong}>
+                      {typedChar === ' ' ? '\u00A0' : typedChar}
+                    </span>
+                  )}
+                </span>
+              );
+            })}
+          </div>
+        </div>
       );
     });
-
-    return [...typedElements, ...remainingElements];
   };
 
   const dynamicFontStyle = { fontSize: `${fontSizeRem}rem` };
 
   return (
     <main className={styles.container}>
-      <div
-        className={styles.bookSpread}
+      <article
+        className={styles.notebook}
         onClick={() => {
-          textareaRef.current?.focus();
-          setIsBookListOpen(false); // 빈 공간 누르면 드롭다운 닫기
+          inputRef.current?.focus();
+          setIsBookListOpen(false);
         }}
       >
-        {/* =========================================
-            왼쪽 페이지 (현재 필사 영역)
-        ========================================= */}
-        <div className={`${styles.page} ${styles.leftPage}`}>
-          {!isFocused && typingText.length < currentPageContent.length && (
-            <div className={styles.focusGuide}>책을 한 번 누른 후 타자를 치세요</div>
-          )}
+        {/*{!isFocused && typingText.length < currentPageContent.length && (*/}
+        {/*  <div className={styles.focusGuide}>노트를 한 번 누른 후 타자를 치세요</div>*/}
+        {/*)}*/}
 
-          <div className={styles.pageHeader}>
-            <div className={styles.bookInfo}>
-              {selectedBook.title}
-              <span>{selectedBook.author}</span>
-            </div>
-            <div className={styles.progressText}>진행도 {Math.floor(totalProgress)}%</div>
+        <header className={styles.pageHeader}>
+          <div className={styles.bookInfo}>
+            {selectedBook.title} <span>{selectedBook.author}</span>
           </div>
 
-          <div className={styles.typingAreaWrapper}>
-            <textarea
-              ref={textareaRef}
-              className={styles.hiddenTextarea}
-              value={typingText}
-              onChange={handleTyping}
-              onFocus={() => setIsFocused(true)}
-              onBlur={() => setIsFocused(false)}
-              spellCheck={false}
-              autoFocus
-            />
-            <div className={styles.textDisplay} style={dynamicFontStyle}>
-              {renderHighlightedText()}
-            </div>
-          </div>
-
-          <div className={styles.pageFooter} style={{ left: 0 }}>
-            - {pageIndex + 1} -
-          </div>
-        </div>
-
-        {/* =========================================
-            오른쪽 페이지 (미리보기 및 컨트롤)
-        ========================================= */}
-        <div className={`${styles.page} ${styles.rightPage}`}>
-          <div className={styles.pageHeader}>
-            {/* ✨ 1. 책 목록 드롭다운 (좌측) */}
+          <div className={styles.controls}>
             <div className={styles.bookDropdown}>
               <button
                 className={styles.dropdownBtn}
                 onClick={e => {
-                  e.stopPropagation(); // 책상 클릭 이벤트 방지
+                  e.stopPropagation();
                   setIsBookListOpen(!isBookListOpen);
                 }}
               >
@@ -199,7 +234,7 @@ export default function Home() {
                       onClick={e => {
                         e.stopPropagation();
                         changeBook(book);
-                        setIsBookListOpen(false); // 선택 시 드롭다운 닫기
+                        setIsBookListOpen(false);
                       }}
                     >
                       {book.title}
@@ -210,38 +245,57 @@ export default function Home() {
               )}
             </div>
 
-            {/* ✨ 2. 글자 크기 조절 (우측) */}
             <div className={styles.zoomControls}>
               <button
                 onClick={e => {
                   e.stopPropagation();
-                  handleZoomOut();
+                  setFontSizeRem(p => Math.max(p - 0.2, 1.1));
                 }}
                 disabled={fontSizeRem <= 1.1}
               >
-                글자 작게
+                글씨 작게
               </button>
               <button
                 onClick={e => {
                   e.stopPropagation();
-                  handleZoomIn();
+                  setFontSizeRem(p => Math.min(p + 0.2, 2.5));
                 }}
                 disabled={fontSizeRem >= 2.5}
               >
-                글자 크게
+                글씨 크게
               </button>
             </div>
           </div>
+        </header>
 
-          <div className={styles.previewContent} style={dynamicFontStyle}>
-            {nextPageContent ? nextPageContent : <div className={styles.emptyMessage}>마지막 장입니다.</div>}
-          </div>
+        <section className={styles.typingAreaWrapper}>
+          {/* ✨ textarea에서 input 태그로 교체 완료 */}
+          {/*<input*/}
+          {/*  type="text"*/}
+          {/*  ref={inputRef}*/}
+          {/*  className={styles.hiddenInput}*/}
+          {/*  value={typingText}*/}
+          {/*  onChange={handleTyping}*/}
+          {/*  onKeyDown={handleKeyDown}*/}
+          {/*  onFocus={() => setIsFocused(true)}*/}
+          {/*  onBlur={() => setIsFocused(false)}*/}
+          {/*  spellCheck={false}*/}
+          {/*  autoFocus*/}
+          {/*/>*/}
 
-          <div className={styles.pageFooter} style={{ right: 0 }}>
-            - {pageIndex + 2 <= totalPages ? pageIndex + 2 : ''} -
+          <div className={styles.linesContainer} style={dynamicFontStyle}>
+            {/*{renderLines()}*/}
+            {/*{currentPageContent.map((char, index) => (*/}
+            {/*  <span key={index}>{char}</span>*/}
+            {/*))}*/}
           </div>
-        </div>
-      </div>
+        </section>
+
+        <footer className={styles.pageFooter}>
+          <div className={styles.progressText}>전체 진행도 {Math.floor(totalProgress)}%</div>
+          <div className={styles.pageIndex}>- {pageIndex + 1} 쪽 -</div>
+        </footer>
+      </article>
     </main>
   );
 }

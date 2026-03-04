@@ -1,5 +1,6 @@
 @use 'scss/layout' as L;
 
+
 .container {
   @include L.flex-a-j-center;
   height: 100vh;
@@ -9,259 +10,145 @@
   font-family: var(--font-noto-sans), sans-serif;
   padding: 2rem;
 
-  .bookSpread {
+  .notebook {
     display: flex;
+    flex-direction: column;
     width: 100%;
-    max-width: 1400px;
+    max-width: 1200px;
     height: 90vh;
+    background: #fdfbf7;
     border-radius: 8px;
-    box-shadow:
-        0 30px 60px rgba(0, 0, 0, 0.4),
-        0 0 0 1px rgba(255,255,255,0.2);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+    padding: 3rem 4rem;
     position: relative;
     cursor: text;
 
-    &::before {
-      content: '';
-      @include L.position-absolute-bottom-left(-8px, 2px);
-      width: calc(100% - 4px);
-      height: 8px;
-      background: #e0d8c8;
-      border-radius: 0 0 4px 4px;
-      border: 1px solid #c7bca5;
-      border-top: none;
-    }
+    .pageHeader {
+      @include L.flex-a-center-j-between;
+      border-bottom: 2px solid #ddd;
+      padding-bottom: 1.5rem;
+      margin-bottom: 2rem;
 
-    .page {
-      flex: 1;
-      position: relative;
-      padding: 4rem 4rem 3rem 4rem;
-      @include L.flex-column;
-      overflow: hidden;
-    }
-
-    /* 📖 왼쪽 페이지 (현재 필사 중인 곳) */
-    .leftPage {
-      background: linear-gradient(to right, #fcfaf8 0%, #fff 85%, #e3dcd1 100%);
-      border-radius: 8px 0 0 8px;
-      border-right: 1px solid #d3cabc;
-      box-shadow: inset -20px 0 20px -20px rgba(0,0,0,0.2);
-
-      .pageHeader {
-        @include L.flex-a-center-j-between;
-        border-bottom: 2px solid #eaeaea;
-        padding-bottom: 1rem;
-        margin-bottom: 2rem;
-
-        .bookInfo {
-          font-size: 2rem;
-          font-weight: 800;
-          color: #333;
-          span { color: #888; font-weight: 400; font-size: 1rem; margin-left: 0.5rem; }
-        }
-
-        .progressText {
-          font-size: 1.1rem;
-          font-weight: 600;
-          color: #0088cc;
-        }
+      .bookInfo {
+        font-size: 1.5rem; font-weight: 800; color: #222;
+        span { color: #888; font-weight: 600; font-size: 1.1rem; margin-left: 0.8rem; }
       }
 
-      .typingAreaWrapper {
-        position: relative;
-        flex: 1;
+      .controls {
+        @include L.flex-a-center-gap(1.5rem);
 
-        .hiddenTextarea {
-          position: absolute; top: 0; left: 0; @include L.wh100;
-          opacity: 0; z-index: 10; resize: none; cursor: text;
-        }
-
-        .textDisplay {
-          @include L.wh100;
-          line-height: 2.2;
-          white-space: pre-wrap;
-          color: #bbb;
-          overflow-y: auto;
-          padding-right: 15px;
-
-          &::-webkit-scrollbar { width: 8px; }
-          &::-webkit-scrollbar-track { background-color: transparent; }
-          &::-webkit-scrollbar-thumb { background-color: #ddd; border-radius: 10px; }
-
-          span {
-            transition: color 0.1s, background-color 0.1s;
-            padding: 2px 0;
-
-            &.typed { color: #111; font-weight: 600; }
-            &.wrong { color: #e74c3c;
-              //background-color: #e74c3c;
-              //border-radius: 4px;
-              //padding: 2px 4px;
-            }
-            &.current {
-              //color: #000; font-weight: 800;
-              //background-color: #ffd54f;
-              border-bottom: 2px solid #333;
-              //border-radius: 4px; padding: 2px 4px;
-              animation: blink 1s step-end infinite;
-            }
-            &.remain { color: #bbb; }
-          }
-        }
-      }
-
-      .focusGuide {
-        position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-        background-color: rgba(51, 51, 51, 0.85); color: #fff;
-        padding: 1rem 2rem; border-radius: 50px; font-size: 1.2rem; font-weight: 600;
-        z-index: 20; pointer-events: none; animation: float 2s ease-in-out infinite;
-      }
-    }
-
-    /* 📖 오른쪽 페이지 (미리보기 및 컨트롤) */
-    .rightPage {
-      background: linear-gradient(to right, #e3dcd1 0%, #fff 15%, #fcfaf8 100%);
-      border-radius: 0 8px 8px 0;
-      border-left: 1px solid #fff;
-      box-shadow: inset 20px 0 20px -20px rgba(0,0,0,0.15);
-
-      .pageHeader {
-        @include L.flex-a-center-j-between; /* 양쪽 정렬 */
-        border-bottom: 2px solid #eaeaea;
-        padding-bottom: 1rem;
-        margin-bottom: 2rem;
-
-        /* ✨ 새로 추가된 책 목록 드롭다운 (좌측) */
         .bookDropdown {
           position: relative;
 
-          /* 책 목록 열기 버튼 */
           .dropdownBtn {
-            padding: 0.6rem 1.5rem;
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: #fff;
-            background-color: #4a3b32; /* 짙은 나무색 */
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            transition: background-color 0.2s;
-
+            padding: 0.6rem 1.5rem; font-size: 1.1rem; font-weight: 700; color: #fff;
+            background-color: #4a3b32; border: none; border-radius: 8px; cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: background-color 0.2s;
             &:hover { background-color: #3e2723; }
           }
 
-          /* 드롭다운 메뉴 (열렸을 때) */
           .dropdownMenu {
-            position: absolute;
-            top: calc(100% + 10px);
-            left: 0;
-            width: 280px;
-            background: #fff;
-            border: 2px solid #ccc;
-            border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-            z-index: 100;
-            overflow: hidden;
+            position: absolute; top: calc(100% + 10px); right: 0; width: 280px;
+            background: #fff; border: 2px solid #ccc; border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15); z-index: 100; overflow: hidden;
             @include L.flex-column;
-            animation: fadeIn 0.2s ease-out;
 
             button {
-              width: 100%;
-              padding: 1.2rem 1.5rem;
-              text-align: left;
-              background: none;
-              border: none;
-              border-bottom: 1px solid #eee;
-              font-size: 1.1rem;
-              font-weight: 600;
-              color: #333;
-              cursor: pointer;
-              transition: background-color 0.2s;
-
-              &:last-child { border-bottom: none; }
+              width: 100%; padding: 1.2rem 1.5rem; text-align: left; background: none;
+              border: none; border-bottom: 1px solid #eee; font-size: 1.1rem; font-weight: 600;
+              color: #333; cursor: pointer; transition: background-color 0.2s;
               &:hover { background-color: #f5f5f7; }
-
-              /* 현재 선택된 책 강조 */
-              &.active {
-                background-color: #e8f0fe;
-                color: #0088cc;
-              }
-
-              .dropdownAuthor {
-                display: block;
-                font-size: 0.9rem;
-                color: #888;
-                margin-top: 0.3rem;
-                font-weight: 400;
-              }
+              &.active { background-color: #e8f0fe; color: #0088cc; }
+              .dropdownAuthor { display: block; font-size: 0.9rem; color: #888; margin-top: 0.3rem; font-weight: 400; }
             }
           }
         }
 
-        /* ✨ 줌 컨트롤 (우측) */
         .zoomControls {
-          @include L.flex-a-center-gap(0.8rem);
-
+          @include L.flex-a-center-gap(0.5rem);
           button {
-            padding: 0.5rem 1rem;
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: #333;
-            background-color: #f0f0f0;
-            border: 2px solid #ccc;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.2s;
-
-            &:hover:not(:disabled) {
-              background-color: #333;
-              color: #fff;
-              border-color: #333;
-            }
-
-            &:disabled {
-              opacity: 0.3;
-              cursor: not-allowed;
-            }
+            padding: 0.6rem 1.2rem; font-size: 1.1rem; font-weight: 700; color: #333;
+            background-color: #f0f0f0; border: 2px solid #ccc; border-radius: 8px; cursor: pointer;
+            &:hover:not(:disabled) { background-color: #333; color: #fff; border-color: #333; }
+            &:disabled { opacity: 0.3; cursor: not-allowed; }
           }
         }
       }
+    }
 
-      .previewContent {
-        flex: 1;
-        line-height: 2.2;
-        white-space: pre-wrap;
-        color: #ccc;
-        overflow-y: auto;
-        padding-right: 15px;
+    .typingAreaWrapper {
+      position: relative;
+      flex: 1;
+      overflow-y: auto;
+      padding-right: 15px;
 
-        &::-webkit-scrollbar { width: 8px; }
-        &::-webkit-scrollbar-track { background-color: transparent; }
-        &::-webkit-scrollbar-thumb { background-color: #eee; border-radius: 10px; }
+      &::-webkit-scrollbar { width: 8px; }
+      &::-webkit-scrollbar-thumb { background-color: #ccc; border-radius: 10px; }
+
+      /* ✨ textarea 대신 input용으로 완전히 대체된 투명 클래스 */
+      .hiddenInput {
+        position: absolute; top: 0; left: 0; @include L.wh100;
+        opacity: 0; z-index: 10; cursor: text;
+        color: transparent; background: transparent; caret-color: transparent;
+        border: none; outline: none;
       }
 
-      .emptyMessage {
-        @include L.flex-a-j-center;
-        @include L.wh100;
-        color: #aaa;
-        font-size: 1.3rem;
-        font-weight: 600;
+      .linesContainer {
+        @include L.flex-column;
+        gap: 2rem;
+        padding-bottom: 4rem;
+
+        .emptyLine {
+          height: 1rem;
+          .enterHint {
+            font-size: 1rem; color: #0088cc; font-weight: 600;
+            background: #e8f0fe; padding: 0.2rem 0.8rem; border-radius: 4px;
+          }
+        }
+
+        .linePair {
+          @include L.flex-column;
+          gap: 0.5rem;
+
+          .originalLine {
+            color: #888; font-weight: 600; white-space: pre-wrap; letter-spacing: 1.5px;
+          }
+
+          .typedLine {
+            color: #111; font-weight: 700; white-space: pre-wrap; letter-spacing: 1.5px;
+
+            .char {
+              display: inline-block; position: relative;
+
+              &.current {
+                border-bottom: 3px solid #333;
+                animation: blink 1s step-end infinite;
+              }
+
+              .correct { color: #111; }
+              .wrong { color: #e74c3c; } /* 형광색 없이 글씨만 빨간색 */
+            }
+          }
+        }
       }
     }
 
     .pageFooter {
-      position: absolute;
-      bottom: 2rem;
-      width: 100%;
-      text-align: center;
-      font-size: 1.1rem;
-      color: #888;
-      font-weight: 600;
+      @include L.flex-a-center-j-between;
+      margin-top: 1rem; padding-top: 1.5rem; border-top: 2px dashed #eaeaea;
+
+      .progressText { font-size: 1.1rem; font-weight: 700; color: #0088cc; }
+      .pageIndex { font-size: 1.1rem; font-weight: 600; color: #888; }
     }
+  }
+
+  .focusGuide {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    background-color: rgba(51, 51, 51, 0.9); color: #fff;
+    padding: 1rem 2rem; border-radius: 50px; font-size: 1.2rem; font-weight: 600;
+    z-index: 20; pointer-events: none; animation: float 2s ease-in-out infinite;
   }
 }
 
 @keyframes blink { 0%, 100% { border-color: transparent; } 50% { border-color: #333; } }
 @keyframes float { 0%, 100% { transform: translate(-50%, -50%); } 50% { transform: translate(-50%, -55%); } }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
