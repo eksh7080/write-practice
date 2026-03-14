@@ -1,154 +1,296 @@
 @use 'scss/layout' as L;
 
-
 .container {
   @include L.flex-a-j-center;
   height: 100vh;
   background-color: #5d4037;
+  padding: 1.5rem;
+  box-sizing: border-box;
+}
+
+.notebook {
+  @include L.flex-column;
+  width: 100%;
+  max-width: 1100px;
+  height: 100%;
+  background: #fdfbf7;
+  border-radius: 8px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+  padding: 1.2rem 2.5rem;
+  cursor: text;
   overflow: hidden;
-  position: relative;
-  font-family: var(--font-noto-sans), sans-serif;
-  padding: 2rem;
+  box-sizing: border-box;
 
-  .notebook {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    max-width: 1200px;
-    height: 90vh;
-    background: #fdfbf7;
-    border-radius: 8px;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
-    padding: 3rem 4rem;
-    position: relative;
-    cursor: text;
+  // 장르 탭
+  .genreTabs {
+    @include L.flex-a-center-gap(0.3rem);
+    margin-bottom: 0.6rem;
+    flex-shrink: 0;
+  }
 
-    .pageHeader {
-      @include L.flex-a-center-j-between;
-      border-bottom: 2px solid #ddd;
-      padding-bottom: 1.5rem;
-      margin-bottom: 2rem;
+  .genreTab {
+    padding: 0.3rem 1.1rem;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #888;
+    background: none;
+    border: 1.5px solid #ddd;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+    letter-spacing: 0.5px;
 
-      .bookInfo {
-        font-size: 1.5rem; font-weight: 800; color: #222;
-        span { color: #888; font-weight: 600; font-size: 1.1rem; margin-left: 0.8rem; }
-      }
-
-      .controls {
-        @include L.flex-a-center-gap(1.5rem);
-
-        .bookDropdown {
-          position: relative;
-
-          .dropdownBtn {
-            padding: 0.6rem 1.5rem; font-size: 1.1rem; font-weight: 700; color: #fff;
-            background-color: #4a3b32; border: none; border-radius: 8px; cursor: pointer;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: background-color 0.2s;
-            &:hover { background-color: #3e2723; }
-          }
-
-          .dropdownMenu {
-            position: absolute; top: calc(100% + 10px); right: 0; width: 280px;
-            background: #fff; border: 2px solid #ccc; border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.15); z-index: 100; overflow: hidden;
-            @include L.flex-column;
-
-            button {
-              width: 100%; padding: 1.2rem 1.5rem; text-align: left; background: none;
-              border: none; border-bottom: 1px solid #eee; font-size: 1.1rem; font-weight: 600;
-              color: #333; cursor: pointer; transition: background-color 0.2s;
-              &:hover { background-color: #f5f5f7; }
-              &.active { background-color: #e8f0fe; color: #0088cc; }
-              .dropdownAuthor { display: block; font-size: 0.9rem; color: #888; margin-top: 0.3rem; font-weight: 400; }
-            }
-          }
-        }
-
-        .zoomControls {
-          @include L.flex-a-center-gap(0.5rem);
-          button {
-            padding: 0.6rem 1.2rem; font-size: 1.1rem; font-weight: 700; color: #333;
-            background-color: #f0f0f0; border: 2px solid #ccc; border-radius: 8px; cursor: pointer;
-            &:hover:not(:disabled) { background-color: #333; color: #fff; border-color: #333; }
-            &:disabled { opacity: 0.3; cursor: not-allowed; }
-          }
-        }
-      }
-    }
-
-    .typingAreaWrapper {
-      position: relative;
-      flex: 1;
-      overflow-y: auto;
-      padding-right: 15px;
-
-      &::-webkit-scrollbar { width: 8px; }
-      &::-webkit-scrollbar-thumb { background-color: #ccc; border-radius: 10px; }
-
-      /* ✨ textarea 대신 input용으로 완전히 대체된 투명 클래스 */
-      .hiddenInput {
-        position: absolute; top: 0; left: 0; @include L.wh100;
-        opacity: 0; z-index: 10; cursor: text;
-        color: transparent; background: transparent; caret-color: transparent;
-        border: none; outline: none;
-      }
-
-      .linesContainer {
-        @include L.flex-column;
-        gap: 2rem;
-        padding-bottom: 4rem;
-
-        .emptyLine {
-          height: 1rem;
-          .enterHint {
-            font-size: 1rem; color: #0088cc; font-weight: 600;
-            background: #e8f0fe; padding: 0.2rem 0.8rem; border-radius: 4px;
-          }
-        }
-
-        .linePair {
-          @include L.flex-column;
-          gap: 0.5rem;
-
-          .originalLine {
-            color: #888; font-weight: 600; white-space: pre-wrap; letter-spacing: 1.5px;
-          }
-
-          .typedLine {
-            color: #111; font-weight: 700; white-space: pre-wrap; letter-spacing: 1.5px;
-
-            .char {
-              display: inline-block; position: relative;
-
-              &.current {
-                border-bottom: 3px solid #333;
-                animation: blink 1s step-end infinite;
-              }
-
-              .correct { color: #111; }
-              .wrong { color: #e74c3c; } /* 형광색 없이 글씨만 빨간색 */
-            }
-          }
-        }
-      }
-    }
-
-    .pageFooter {
-      @include L.flex-a-center-j-between;
-      margin-top: 1rem; padding-top: 1.5rem; border-top: 2px dashed #eaeaea;
-
-      .progressText { font-size: 1.1rem; font-weight: 700; color: #0088cc; }
-      .pageIndex { font-size: 1.1rem; font-weight: 600; color: #888; }
+    &:hover:not(.genreTabActive) {
+      border-color: #aaa;
+      color: #555;
     }
   }
 
-  .focusGuide {
-    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-    background-color: rgba(51, 51, 51, 0.9); color: #fff;
-    padding: 1rem 2rem; border-radius: 50px; font-size: 1.2rem; font-weight: 600;
-    z-index: 20; pointer-events: none; animation: float 2s ease-in-out infinite;
+  .genreTabActive {
+    background-color: #4a3b32;
+    color: #fdfbf7;
+    border-color: #4a3b32;
+  }
+
+  // 헤더
+  .pageHeader {
+    @include L.flex-a-center-j-between;
+    border-bottom: 2px solid #ddd;
+    padding-bottom: 0.6rem;
+    margin-bottom: 0.8rem;
+    flex-shrink: 0;
+
+    .bookInfo {
+      font-size: 2rem;
+      font-weight: 800;
+      color: #222;
+
+      span {
+        color: #888;
+        font-weight: 600;
+        font-size: 1.4rem;
+        margin-left: 0.8rem;
+      }
+    }
+
+    .controls {
+      @include L.flex-a-center-gap(1rem);
+
+      // 글씨 크기 버튼 - 배경 없이 보더만
+      .zoomControls {
+        @include L.flex-a-center-gap(0.4rem);
+
+        button {
+          padding: 0.4rem 0.9rem;
+          font-size: 0.85rem;
+          font-weight: 600;
+          color: #555;
+          background: none;
+          border: 1.5px solid #bbb;
+          border-radius: 6px;
+          cursor: pointer;
+          transition: border-color 0.2s, color 0.2s;
+
+          &:hover:not(:disabled) { border-color: #333; color: #111; }
+          &:disabled { opacity: 0.3; cursor: not-allowed; }
+        }
+      }
+
+      // 책 목록 드롭다운
+      .bookDropdown {
+        position: relative;
+
+        .dropdownBtn {
+          padding: 0.4rem 1rem;
+          font-size: 0.85rem;
+          font-weight: 600;
+          color: #555;
+          background: none;
+          border: 1.5px solid #bbb;
+          border-radius: 6px;
+          cursor: pointer;
+          transition: border-color 0.2s, color 0.2s;
+
+          &:hover { border-color: #333; color: #111; }
+        }
+
+        .dropdownMenu {
+          position: absolute;
+          top: calc(100% + 8px);
+          right: 0;
+          width: 260px;
+          background: #fff;
+          border: 1.5px solid #ddd;
+          border-radius: 10px;
+          box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+          z-index: 100;
+          overflow: hidden;
+          @include L.flex-column;
+
+          button {
+            width: 100%;
+            padding: 1rem 1.2rem;
+            text-align: left;
+            background: none;
+            border: none;
+            border-bottom: 1px solid #eee;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #333;
+            cursor: pointer;
+            transition: background-color 0.15s;
+
+            &:hover { background-color: #f5f5f7; }
+            &.active { background-color: #e8f0fe; color: #0088cc; }
+
+            .dropdownAuthor {
+              display: block;
+              font-size: 0.8rem;
+              color: #888;
+              margin-top: 0.2rem;
+              font-weight: 400;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // 필사 영역
+  .typingAreaWrapper {
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    .sentenceList {
+      @include L.flex-column;
+      gap: 0.5rem;
+    }
+
+    .sentenceBlock {
+      @include L.flex-column;
+      gap: 0.2rem;
+    }
+
+    // 원문 span
+    .original {
+      font-weight: 600;
+      color: #1a1a1a;
+      line-height: 1.5;
+      letter-spacing: 0.3px;
+    }
+
+    // 틀린 글자
+    .charWrong {
+      color: #e53935;
+    }
+
+    // 입력 input 공통
+    .typingInput {
+      font-weight: 500;
+      letter-spacing: 0.3px;
+      line-height: 1.5;
+      width: 100%;
+      border: none;
+      border-bottom: 1.5px solid #ddd;
+      background: transparent;
+      outline: none;
+      padding: 0.1rem 0;
+      color: #333;
+      font-family: inherit;
+      font-size: inherit;
+    }
+
+    // 현재 입력 중인 문장
+    .typingInputActive {
+      border-bottom-color: #4a3b32;
+      caret-color: #4a3b32;
+    }
+
+    // 완료된 문장
+    .typingInputDone {
+      color: #aaa;
+      border-bottom-color: #eee;
+      caret-color: transparent;
+    }
+  }
+
+  // 푸터
+  .pageFooter {
+    @include L.flex-a-j-center;
+    margin-top: 0.6rem;
+    padding-top: 0.6rem;
+    border-top: 1px dashed #eaeaea;
+    flex-shrink: 0;
+
+    .pageIndex {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #aaa;
+    }
   }
 }
 
-@keyframes blink { 0%, 100% { border-color: transparent; } 50% { border-color: #333; } }
-@keyframes float { 0%, 100% { transform: translate(-50%, -50%); } 50% { transform: translate(-50%, -55%); } }
+// 완료 모달
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  @include L.flex-a-j-center;
+  z-index: 200;
+}
+
+.modal {
+  background: #fdfbf7;
+  border-radius: 16px;
+  padding: 3rem 4rem;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  @include L.flex-column;
+  gap: 2rem;
+
+  h2 {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #222;
+  }
+
+  .modalStats {
+    @include L.flex-a-j-center;
+    gap: 3rem;
+  }
+
+  .statItem {
+    @include L.flex-column;
+    gap: 0.5rem;
+  }
+
+  .statLabel {
+    font-size: 0.9rem;
+    color: #888;
+    font-weight: 600;
+  }
+
+  .statValue {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: #4a3b32;
+  }
+
+  .modalClose {
+    padding: 0.8rem 2rem;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #555;
+    background: none;
+    border: 1.5px solid #bbb;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+    align-self: center;
+
+    &:hover { border-color: #333; color: #111; }
+  }
+}
