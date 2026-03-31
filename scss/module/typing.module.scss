@@ -1,239 +1,558 @@
 @use 'scss/layout' as L;
 
-.container {
-  @include L.flex-a-j-center;
+// ==========================================
+// 책상 (전체 배경)
+// ==========================================
+.desk {
   height: 100vh;
-  background-color: #5d4037;
+  background: linear-gradient(145deg, #3e2f24 0%, #5a4535 50%, #4a3728 100%);
   padding: 1.5rem;
   box-sizing: border-box;
+  @include L.flex-a-j-center;
+  overflow: hidden;
 }
 
-.notebook {
+.deskSurface {
   @include L.flex-column;
   width: 100%;
-  max-width: 1100px;
+  max-width: 1200px;
   height: 100%;
-  background: #fdfbf7;
-  border-radius: 8px;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
-  padding: 1.2rem 2.5rem;
-  cursor: text;
-  overflow: hidden;
-  box-sizing: border-box;
+  gap: 1rem;
+}
 
-  // 장르 탭
-  .genreTabs {
-    @include L.flex-a-center-gap(0.3rem);
-    margin-bottom: 0.6rem;
-    flex-shrink: 0;
+// ==========================================
+// 책 제목 헤더
+// ==========================================
+.bookTitleHeader {
+  text-align: center;
+  flex-shrink: 0;
+  padding: 0.3rem 0;
+
+  h1 {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: #f5ecd7;
+    letter-spacing: 1px;
   }
 
-  .genreTab {
-    padding: 0.3rem 1.1rem;
-    font-size: 0.85rem;
-    font-weight: 700;
-    color: #888;
-    background: none;
-    border: 1.5px solid #ddd;
-    border-radius: 20px;
-    cursor: pointer;
-    transition: background-color 0.2s, color 0.2s, border-color 0.2s;
-    letter-spacing: 0.5px;
-
-    &:hover:not(.genreTabActive) {
-      border-color: #aaa;
-      color: #555;
-    }
-  }
-
-  .genreTabActive {
-    background-color: #4a3b32;
-    color: #fdfbf7;
-    border-color: #4a3b32;
-  }
-
-  // 헤더
-  .pageHeader {
-    @include L.flex-a-center-j-between;
-    border-bottom: 2px solid #ddd;
-    padding-bottom: 0.6rem;
-    margin-bottom: 0.8rem;
-    flex-shrink: 0;
-
-    .bookInfo {
-      font-size: 2rem;
-      font-weight: 800;
-      color: #222;
-
-      span {
-        color: #888;
-        font-weight: 600;
-        font-size: 1.4rem;
-        margin-left: 0.8rem;
-      }
-    }
-
-    .controls {
-      @include L.flex-a-center-gap(1rem);
-
-      // 글씨 크기 버튼 - 배경 없이 보더만
-      .zoomControls {
-        @include L.flex-a-center-gap(0.4rem);
-
-        button {
-          padding: 0.4rem 0.9rem;
-          font-size: 0.85rem;
-          font-weight: 600;
-          color: #555;
-          background: none;
-          border: 1.5px solid #bbb;
-          border-radius: 6px;
-          cursor: pointer;
-          transition: border-color 0.2s, color 0.2s;
-
-          &:hover:not(:disabled) { border-color: #333; color: #111; }
-          &:disabled { opacity: 0.3; cursor: not-allowed; }
-        }
-      }
-
-      // 책 목록 드롭다운
-      .bookDropdown {
-        position: relative;
-
-        .dropdownBtn {
-          padding: 0.4rem 1rem;
-          font-size: 0.85rem;
-          font-weight: 600;
-          color: #555;
-          background: none;
-          border: 1.5px solid #bbb;
-          border-radius: 6px;
-          cursor: pointer;
-          transition: border-color 0.2s, color 0.2s;
-
-          &:hover { border-color: #333; color: #111; }
-        }
-
-        .dropdownMenu {
-          position: absolute;
-          top: calc(100% + 8px);
-          right: 0;
-          width: 260px;
-          background: #fff;
-          border: 1.5px solid #ddd;
-          border-radius: 10px;
-          box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
-          z-index: 100;
-          overflow: hidden;
-          @include L.flex-column;
-
-          button {
-            width: 100%;
-            padding: 1rem 1.2rem;
-            text-align: left;
-            background: none;
-            border: none;
-            border-bottom: 1px solid #eee;
-            font-size: 0.95rem;
-            font-weight: 600;
-            color: #333;
-            cursor: pointer;
-            transition: background-color 0.15s;
-
-            &:hover { background-color: #f5f5f7; }
-            &.active { background-color: #e8f0fe; color: #0088cc; }
-
-            .dropdownAuthor {
-              display: block;
-              font-size: 0.8rem;
-              color: #888;
-              margin-top: 0.2rem;
-              font-weight: 400;
-            }
-          }
-        }
-      }
-    }
-  }
-
-  // 필사 영역
-  .typingAreaWrapper {
-    flex: 1;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-
-    .sentenceList {
-      @include L.flex-column;
-      gap: 0.5rem;
-    }
-
-    .sentenceBlock {
-      @include L.flex-column;
-      gap: 0.2rem;
-    }
-
-    // 원문 span
-    .original {
-      font-weight: 600;
-      color: #1a1a1a;
-      line-height: 1.5;
-      letter-spacing: 0.3px;
-    }
-
-    // 틀린 글자
-    .charWrong {
-      color: #e53935;
-    }
-
-    // 입력 input 공통
-    .typingInput {
-      font-weight: 500;
-      letter-spacing: 0.3px;
-      line-height: 1.5;
-      width: 100%;
-      border: none;
-      border-bottom: 1.5px solid #ddd;
-      background: transparent;
-      outline: none;
-      padding: 0.1rem 0;
-      color: #333;
-      font-family: inherit;
-      font-size: inherit;
-    }
-
-    // 현재 입력 중인 문장
-    .typingInputActive {
-      border-bottom-color: #4a3b32;
-      caret-color: #4a3b32;
-    }
-
-    // 완료된 문장
-    .typingInputDone {
-      color: #aaa;
-      border-bottom-color: #eee;
-      caret-color: transparent;
-    }
-  }
-
-  // 푸터
-  .pageFooter {
-    @include L.flex-a-j-center;
-    margin-top: 0.6rem;
-    padding-top: 0.6rem;
-    border-top: 1px dashed #eaeaea;
-    flex-shrink: 0;
-
-    .pageIndex {
-      font-size: 0.9rem;
-      font-weight: 600;
-      color: #aaa;
-    }
+  span {
+    font-size: 1rem;
+    font-weight: 400;
+    color: #c4a882;
+    margin-left: 0.8rem;
   }
 }
 
+// ==========================================
+// 2분할 레이아웃
+// ==========================================
+.deskLayout {
+  display: flex;
+  flex: 1;
+  gap: 0;
+  min-height: 0;
+  cursor: text;
+}
+
+// ==========================================
+// 왼쪽: 원문 책
+// ==========================================
+.book {
+  flex: 1;
+  @include L.flex-column;
+  background: #f5ecd7;
+  border-radius: 4px 0 0 4px;
+  border-left: 5px solid #c4a882;
+  box-shadow:
+    inset -15px 0 30px rgba(0, 0, 0, 0.06),
+    -4px 4px 20px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+  position: relative;
+
+  // 종이 텍스처 느낌
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse at 20% 50%, rgba(255, 248, 230, 0.4) 0%, transparent 70%),
+      radial-gradient(ellipse at 80% 20%, rgba(210, 180, 140, 0.1) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 1;
+  }
+}
+
+.bookPage {
+  flex: 1;
+  overflow-y: auto;
+  padding: 2rem 2.5rem 1rem 2rem;
+  position: relative;
+  z-index: 2;
+  @include L.flex-column;
+  gap: 1.2rem;
+}
+
+.bookSentence {
+  font-weight: 500;
+  color: #2c1810;
+  line-height: 2;
+  letter-spacing: 0.3px;
+  padding: 0.3rem 0.5rem;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+}
+
+.bookSentenceActive {
+  background: rgba(196, 168, 130, 0.2);
+  font-weight: 600;
+}
+
+.bookSentenceDone {
+  color: #8b7d6b;
+}
+
+.charWrong {
+  color: #c0392b;
+  text-decoration: underline;
+  text-decoration-style: wavy;
+  text-underline-offset: 3px;
+}
+
+.bookPageFooter {
+  padding: 0.8rem 2rem;
+  text-align: center;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #8b7d6b;
+  border-top: 1px solid rgba(196, 168, 130, 0.3);
+  flex-shrink: 0;
+  position: relative;
+  z-index: 2;
+}
+
+// ==========================================
+// 책 바인딩 (가운데)
+// ==========================================
+.bookSpine {
+  width: 16px;
+  background: linear-gradient(90deg,
+    rgba(0, 0, 0, 0.15) 0%,
+    rgba(0, 0, 0, 0.05) 30%,
+    rgba(255, 255, 255, 0.05) 50%,
+    rgba(0, 0, 0, 0.05) 70%,
+    rgba(0, 0, 0, 0.12) 100%
+  );
+  flex-shrink: 0;
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 2px;
+    background: rgba(0, 0, 0, 0.12);
+    transform: translateX(-50%);
+  }
+}
+
+// ==========================================
+// 오른쪽: 필사 노트
+// ==========================================
+.notebook {
+  flex: 1;
+  @include L.flex-column;
+  background: #fdfbf7;
+  border-radius: 0 4px 4px 0;
+  border-left: 3px solid #e8a0a0;
+  box-shadow:
+    inset 15px 0 30px rgba(0, 0, 0, 0.03),
+    4px 4px 20px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+  position: relative;
+
+  // 노트 줄 패턴
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      transparent 0px,
+      transparent 31px,
+      #d4e4f7 31px,
+      #d4e4f7 32px
+    );
+    opacity: 0.5;
+    pointer-events: none;
+    z-index: 1;
+  }
+}
+
+.notebookPage {
+  flex: 1;
+  overflow-y: auto;
+  padding: 2rem 2rem 1rem 2rem;
+  position: relative;
+  z-index: 2;
+  @include L.flex-column;
+  gap: 1.2rem;
+}
+
+.notebookSentence {
+  padding: 0.3rem 0.5rem;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.notebookSentenceActive {
+  background: rgba(74, 59, 50, 0.04);
+}
+
+.typingInput {
+  font-weight: 500;
+  letter-spacing: 0.3px;
+  line-height: 2;
+  width: 100%;
+  border: none;
+  border-bottom: 1.5px solid transparent;
+  background: transparent;
+  outline: none;
+  padding: 0.3rem 0;
+  color: #333;
+  font-family: inherit;
+  font-size: inherit;
+
+  &::placeholder {
+    color: #c4b89c;
+    font-style: italic;
+    font-weight: 400;
+  }
+}
+
+.typingInputActive {
+  border-bottom-color: #4a3b32;
+  caret-color: #4a3b32;
+}
+
+.typingInputDone {
+  color: #8b7d6b;
+  caret-color: transparent;
+}
+
+.notebookProgress {
+  padding: 0.8rem 2rem;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 2;
+}
+
+.progressBar {
+  height: 4px;
+  background: #e8e4df;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background: #4a3b32;
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+// ==========================================
+// 패널 토글 버튼
+// ==========================================
+.panelToggle {
+  position: fixed;
+  right: 1.2rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(253, 251, 247, 0.9);
+  border: 1.5px solid #d5cfc8;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  z-index: 160;
+  @include L.flex-a-j-center;
+  color: #4a3b32;
+  transition: all 0.2s;
+  backdrop-filter: blur(4px);
+
+  &:hover {
+    background: #4a3b32;
+    color: #fdfbf7;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+  }
+}
+
+// ==========================================
+// 플로팅 패널
+// ==========================================
+.floatingPanel {
+  position: fixed;
+  right: 0;
+  top: 0;
+  height: 100vh;
+  width: 320px;
+  background: #fdfbf7;
+  box-shadow: -8px 0 30px rgba(0, 0, 0, 0.2);
+  z-index: 170;
+  transform: translateX(100%);
+  transition: transform 0.3s ease;
+  overflow-y: auto;
+  box-sizing: border-box;
+  @include L.flex-column;
+}
+
+.floatingPanelOpen {
+  transform: translateX(0);
+}
+
+.panelBackdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 155;
+}
+
+.panelHeader {
+  @include L.flex-a-center-j-between;
+  padding: 1.2rem 1.5rem;
+  border-bottom: 1.5px solid #e8e4df;
+  flex-shrink: 0;
+
+  h3 {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: #222;
+  }
+
+  button {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    @include L.flex-a-j-center;
+    color: #6b6b6b;
+    cursor: pointer;
+    transition: background-color 0.2s;
+
+    &:hover { background: #f0ece6; }
+  }
+}
+
+.panelSection {
+  padding: 1.2rem 1.5rem;
+  border-bottom: 1px solid #f0ece6;
+}
+
+.panelSectionTitle {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #6b6b6b;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 0.8rem;
+}
+
+.panelGenreTabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+
+.panelGenreTab {
+  padding: 0.8rem 1rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #6b6b6b;
+  background: none;
+  border: 1.5px solid #d5cfc8;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-height: 44px;
+
+  &:hover { border-color: #4a3b32; color: #4a3b32; }
+}
+
+.panelGenreTabActive {
+  background: #4a3b32;
+  color: #fdfbf7;
+  border-color: #4a3b32;
+}
+
+.panelBookList {
+  @include L.flex-column;
+  gap: 0.4rem;
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.panelBookItem {
+  @include L.flex-a-center-gap(0.8rem);
+  width: 100%;
+  padding: 0.8rem 1rem;
+  text-align: left;
+  background: none;
+  border: 1.5px solid transparent;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.15s;
+  min-height: 44px;
+
+  &:hover { background: #f5f3ef; border-color: #e8e4df; }
+
+  div {
+    @include L.flex-column;
+    gap: 0.1rem;
+  }
+}
+
+.panelBookItemActive {
+  background: #f0ece6;
+  border-color: #4a3b32;
+}
+
+.panelBookColor {
+  width: 8px;
+  height: 32px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.panelBookTitle {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #222;
+}
+
+.panelBookAuthor {
+  font-size: 0.82rem;
+  color: #6b6b6b;
+  font-weight: 400;
+}
+
+.panelFontControls {
+  @include L.flex-a-j-center;
+  gap: 1.2rem;
+}
+
+.panelFontBtn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1.5px solid #d5cfc8;
+  background: none;
+  cursor: pointer;
+  @include L.flex-a-j-center;
+  color: #4a3b32;
+  transition: all 0.2s;
+
+  &:hover:not(:disabled) { background: #4a3b32; color: #fdfbf7; border-color: #4a3b32; }
+  &:disabled { opacity: 0.3; cursor: not-allowed; }
+}
+
+.panelFontSize {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: #4a3b32;
+  min-width: 3rem;
+  text-align: center;
+}
+
+.panelProgress {
+  @include L.flex-a-center-gap(1rem);
+
+  span {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: #4a3b32;
+    min-width: 3rem;
+  }
+}
+
+.panelProgressBar {
+  flex: 1;
+  height: 6px;
+  background: #e8e4df;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.panelProgressFill {
+  height: 100%;
+  background: #4a3b32;
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+// ==========================================
+// 이어서 하기 배너
+// ==========================================
+.resumeBanner {
+  position: fixed;
+  top: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #fdfbf7;
+  border-radius: 12px;
+  padding: 1rem 1.5rem;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+  z-index: 300;
+  text-align: center;
+  @include L.flex-column;
+  gap: 0.8rem;
+
+  p {
+    font-size: 1rem;
+    color: #333;
+    margin: 0;
+    strong { color: #4a3b32; }
+  }
+}
+
+.resumeActions {
+  @include L.flex-a-j-center;
+  gap: 0.8rem;
+}
+
+.resumeBtn {
+  padding: 0.6rem 1.4rem;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #fdfbf7;
+  background: #4a3b32;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  min-height: 44px;
+  transition: background-color 0.2s;
+
+  &:hover { background: #3a2e25; }
+}
+
+.resumeDismiss {
+  padding: 0.6rem 1.4rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #555;
+  background: none;
+  border: 1.5px solid #bbb;
+  border-radius: 8px;
+  cursor: pointer;
+  min-height: 44px;
+  transition: border-color 0.2s, color 0.2s;
+
+  &:hover { border-color: #333; color: #111; }
+}
+
+// ==========================================
 // 완료 모달
+// ==========================================
 .modalOverlay {
   position: fixed;
   inset: 0;
@@ -250,6 +569,8 @@
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
   @include L.flex-column;
   gap: 2rem;
+  max-width: 480px;
+  width: 90%;
 
   h2 {
     font-size: 2rem;
@@ -269,7 +590,7 @@
 
   .statLabel {
     font-size: 0.9rem;
-    color: #888;
+    color: #6b6b6b;
     font-weight: 600;
   }
 
@@ -277,6 +598,116 @@
     font-size: 2.5rem;
     font-weight: 800;
     color: #4a3b32;
+  }
+
+  .statsProto {
+    @include L.flex-column;
+    gap: 0.6rem;
+    padding: 1.2rem 1.5rem;
+    background: #f5f3ef;
+    border-radius: 10px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .statsProtoRow { @include L.flex-a-center-j-between; }
+  .statsProtoLabel { font-size: 0.85rem; color: #6b6b6b; font-weight: 600; }
+  .statsProtoValue { font-size: 1.3rem; font-weight: 800; color: #4a3b32; }
+
+  .statsProtoBar {
+    width: 100%; height: 6px; background: #e0dcd7; border-radius: 3px; overflow: hidden;
+  }
+  .statsProtoFill {
+    height: 100%; background: #4a3b32; border-radius: 3px; transition: width 0.5s ease;
+  }
+
+  .statsDetailBtn {
+    padding: 0.6rem 1.2rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #4a3b32;
+    background: none;
+    border: 1.5px solid #4a3b32;
+    border-radius: 8px;
+    cursor: pointer;
+    align-self: center;
+    min-height: 44px;
+    transition: background-color 0.2s, color 0.2s;
+
+    &:hover { background: #4a3b32; color: #fdfbf7; }
+  }
+
+  .statsDetailClicked {
+    background: #4a3b32; color: #fdfbf7; cursor: default;
+  }
+
+  .survey {
+    @include L.flex-column;
+    gap: 0.8rem;
+    width: 100%;
+  }
+
+  .surveyTitle {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #333;
+    text-align: center;
+  }
+
+  .surveyOptions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: center;
+  }
+
+  .surveyOption {
+    padding: 0.6rem 1.2rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #555;
+    background: none;
+    border: 1.5px solid #ccc;
+    border-radius: 20px;
+    cursor: pointer;
+    min-height: 44px;
+    transition: all 0.2s;
+
+    &:hover:not(:disabled) { border-color: #4a3b32; color: #4a3b32; }
+    &:disabled { opacity: 0.4; cursor: default; }
+  }
+
+  .surveyOptionSelected {
+    background: #4a3b32; color: #fdfbf7; border-color: #4a3b32;
+    &:disabled { opacity: 1; }
+  }
+
+  .surveyThanks {
+    font-size: 0.85rem;
+    color: #6b6b6b;
+    text-align: center;
+  }
+
+  .fakeDoorBtn {
+    padding: 0.8rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #fdfbf7;
+    background: #4a3b32;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    align-self: center;
+    min-height: 44px;
+    transition: background-color 0.2s, transform 0.1s;
+
+    &:hover { background: #3a2e25; }
+    &:active { transform: scale(0.98); }
+  }
+
+  .fakeDoorClicked {
+    background: #7cb342; cursor: default;
+    &:hover { background: #7cb342; }
   }
 
   .modalClose {
@@ -288,9 +719,124 @@
     border: 1.5px solid #bbb;
     border-radius: 8px;
     cursor: pointer;
-    transition: border-color 0.2s, color 0.2s;
     align-self: center;
+    min-height: 44px;
+    transition: border-color 0.2s, color 0.2s;
 
     &:hover { border-color: #333; color: #111; }
+  }
+}
+
+// ==========================================
+// 반응형
+// ==========================================
+@media (max-width: 1024px) {
+  .desk {
+    padding: 1rem;
+  }
+
+  .bookTitleHeader {
+    h1 { font-size: 1.4rem; }
+    span { font-size: 0.9rem; }
+  }
+
+  .bookPage, .notebookPage {
+    padding: 1.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .desk {
+    padding: 0.5rem;
+  }
+
+  .deskSurface {
+    gap: 0.5rem;
+  }
+
+  .bookTitleHeader {
+    h1 { font-size: 1.2rem; }
+    span { font-size: 0.85rem; }
+  }
+
+  // 모바일: 상하 배치
+  .deskLayout {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .book {
+    flex: none;
+    height: 40vh;
+    border-radius: 4px 4px 0 0;
+    border-left: none;
+    border-top: 5px solid #c4a882;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  }
+
+  .bookSpine {
+    width: 100%;
+    height: 8px;
+    background: linear-gradient(180deg,
+      rgba(0, 0, 0, 0.12) 0%,
+      rgba(0, 0, 0, 0.04) 30%,
+      rgba(255, 255, 255, 0.04) 50%,
+      rgba(0, 0, 0, 0.04) 70%,
+      rgba(0, 0, 0, 0.10) 100%
+    );
+
+    &::before {
+      left: 0;
+      right: 0;
+      top: 50%;
+      bottom: auto;
+      width: 100%;
+      height: 2px;
+      transform: translateY(-50%);
+    }
+  }
+
+  .notebook {
+    flex: 1;
+    border-radius: 0 0 4px 4px;
+    border-left: none;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  }
+
+  .bookPage, .notebookPage {
+    padding: 1rem;
+  }
+
+  .floatingPanel {
+    width: 100vw;
+  }
+
+  .panelToggle {
+    right: 0.8rem;
+    top: auto;
+    bottom: 2rem;
+    transform: none;
+  }
+
+  .modal {
+    padding: 2rem;
+    gap: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .bookPage, .notebookPage {
+    padding: 0.8rem;
+  }
+
+  .book {
+    height: 35vh;
+  }
+
+  .modal {
+    padding: 1.5rem;
+
+    h2 { font-size: 1.5rem; }
+    .statValue { font-size: 2rem; }
   }
 }
