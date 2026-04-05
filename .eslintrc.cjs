@@ -2,42 +2,16 @@
 
 module.exports = {
   root: true,
-  env: { browser: true, es2020: true },
   extends: [
-    'eslint:recommended',
-    'plugin:@typescript-eslint/recommended',
-    'plugin:@typescript-eslint/recommended-requiring-type-checking',
-    'plugin:react-hooks/recommended',
+    'next/core-web-vitals', // Next.js + TypeScript + React 규칙
+    'prettier', // eslint-config-prettier: Prettier와 충돌하는 규칙 비활성화
   ],
-  parser: '@typescript-eslint/parser',
-  parserOptions: {
-    ecmaVersion: 'latest',
-    sourceType: 'module',
-    ecmaFeatures: {
-      jsx: true
-    },
-    project: ['./tsconfig.json'],
-    tsconfigRootDir: __dirname,
-  },
-  settings: {
-    react: {
-      version: "detect" // 리액트 버전 자동 감지
-    }
-  },
-  plugins: ['@typescript-eslint', 'prettier', 'unused-imports'], // 린트 규칙에 사용할 플러그인들
+  plugins: [
+    'prettier', // eslint-plugin-prettier
+    'unused-imports', // eslint-plugin-unused-imports
+  ],
   rules: {
-    "unused-imports/no-unused-imports": "error", // 사용하지 않는 import 문 에러 표시
-    "unused-imports/no-unused-vars": [
-      "warn",
-      {
-        "vars": "all",
-        "varsIgnorePattern": "^_", // "_"로 시작하는 변수는 무시
-        "args": "after-used",
-        "argsIgnorePattern": "^_"
-      }
-    ], // 사용하지 않는 import 문 제거
-
-    // 린트 + 프리티어 같이 사용
+    // Prettier 규칙을 ESLint 에러로 표시
     'prettier/prettier': [
       'error',
       {
@@ -50,6 +24,18 @@ module.exports = {
         bracketSpacing: true,
         arrowParens: 'avoid',
         endOfLine: 'auto',
+      },
+    ],
+
+    // 사용하지 않는 import 제거
+    'unused-imports/no-unused-imports': 'error',
+    'unused-imports/no-unused-vars': [
+      'warn',
+      {
+        vars: 'all',
+        varsIgnorePattern: '^_',
+        args: 'after-used',
+        argsIgnorePattern: '^_',
       },
     ],
   },
