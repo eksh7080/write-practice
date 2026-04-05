@@ -7,5 +7,9 @@ export interface TypingTypeInterface {
   title: string;
   author: string;
   content: string; // 실제 필사할 내용
+  compiler?: string;
   color: string; // 책 표지 색상
+  genre: 'novel' | 'poem' | 'essay' | 'quote';
+  difficulty?: 'easy' | 'medium' | 'hard';
+  tag?: string[];
 }

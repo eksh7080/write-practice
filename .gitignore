@@ -45,3 +45,6 @@ docker-compose.yml
 Dockerfile
 .idea
 /.idea
+
+# Claude Code
+.claude/settings.json
