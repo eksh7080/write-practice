@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Sitemap: https://your-domain.vercel.app/sitemap.xml
+
+# 네이버 크롤러
+User-agent: Yeti
+Allow: /
