@@ -27,7 +27,13 @@ const incrementCounter = (key: string) => {
 };
 
 const appendToArray = (key: string, item: string) => {
-  const arr = JSON.parse(localStorage.getItem(key) || '[]');
+  let arr: unknown[];
+  try {
+    const parsed = JSON.parse(localStorage.getItem(key) || '[]');
+    arr = Array.isArray(parsed) ? parsed : [];
+  } catch {
+    arr = [];
+  }
   arr.push({ value: item, timestamp: new Date().toISOString() });
   localStorage.setItem(key, JSON.stringify(arr));
 };
@@ -70,13 +76,20 @@ export default function Home() {
       const saved = localStorage.getItem(STORAGE_KEYS.TYPING_PROGRESS);
       if (saved) {
         const data = JSON.parse(saved);
-        const book = BOOKS.find(b => b.id === data.bookId);
-        if (book && data.pageIndex > 0) {
-          setHasResumableProgress(true);
-          setResumeInfo({ bookId: data.bookId, pageIndex: data.pageIndex, bookTitle: book.title });
+        if (
+          typeof data === 'object' && data !== null &&
+          typeof data.bookId === 'number' &&
+          typeof data.pageIndex === 'number' &&
+          data.pageIndex > 0
+        ) {
+          const book = BOOKS.find(b => b.id === data.bookId);
+          if (book) {
+            setHasResumableProgress(true);
+            setResumeInfo({ bookId: data.bookId, pageIndex: data.pageIndex, bookTitle: book.title });
+          }
         }
       }
-    } catch { /* 무시 */ }
+    } catch (e) { console.warn('진행 상태 복원 실패:', e); }
   }, []);
 
   // 실험 3: 진행 상태 저장

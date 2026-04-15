@@ -1,36 +1,103 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ✍️ 필사 타자연습 (write-practice)
 
-## Getting Started
+> 소설, 시, 수필, 명언을 보고 따라 치며 타자 연습하는 웹 앱
 
-First, run the development server:
+![Next.js](https://img.shields.io/badge/Next.js-16.1.0-000?logo=nextdotjs)
+![React](https://img.shields.io/badge/React-19-61DAFB?logo=react)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript)
+![SCSS](https://img.shields.io/badge/SCSS-Modules-CC6699?logo=sass)
+
+![필사 타자연습 데모](assets/demo.gif)
+
+## 주요 기능
+
+- **분할 화면** — 왼쪽 원문을 보며 오른쪽에서 타이핑
+- **장르별 지원** — 소설(`.` 기준 분리), 시(`\n` 기준), 수필, 명언
+- **페이지네이션** — 350자 단위로 콘텐츠 분할
+- **실시간 오타 표시** — 틀린 글자 빨간색 하이라이트
+- **완료 통계** — 정확도, WPM(분당 타자 수) 결과 모달
+- **설정 패널** — 글씨 크기 조절, 장르/작품 선택
+- **이어서 하기** — localStorage 기반 진행 상태 저장·복원
+
+## 기술 스택
+
+| 구분 | 기술 |
+|------|------|
+| Framework | Next.js 16.1.0 (App Router) |
+| UI | React 19, TypeScript 5 |
+| 스타일 | SCSS CSS Modules, Noto Sans KR |
+| 아이콘 | lucide-react |
+| 패키지 매니저 | yarn |
+| 린터 | ESLint, Prettier |
+
+## 시작하기
+
+### 전제 조건
+
+- Node.js 18+
+- yarn
+
+### 설치 및 실행
 
 ```bash
-npm run dev
-# or
+git clone https://github.com/eksh7080/write-practice.git
+cd write-practice
+yarn install
 yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+[http://localhost:3000](http://localhost:3000)에서 확인 가능.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 스크립트
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| 명령어 | 설명 |
+|--------|------|
+| `yarn dev` | 개발 서버 실행 |
+| `yarn build` | 프로덕션 빌드 |
+| `yarn start` | 프로덕션 서버 실행 |
+| `yarn lint` | ESLint 실행 |
 
-## Learn More
+## 프로젝트 구조
 
-To learn more about Next.js, take a look at the following resources:
+```
+write-practice/
+├── app/
+│   ├── layout.tsx              # 루트 레이아웃 (폰트, 메타데이터)
+│   └── page.tsx                # 메인 페이지 (타이핑 로직 통합)
+├── interface/
+│   └── typingTypeInterface.ts  # 도서 데이터 타입 정의
+├── public/novel/
+│   └── novel.json              # 도서 데이터 (소설/시/수필/명언)
+└── scss/
+    ├── global.scss             # 전역 스타일
+    └── module/                 # 컴포넌트별 CSS Modules
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 데이터 구조
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+도서 데이터는 `public/novel/novel.json`에 저장되며, 아래 타입을 따름:
 
-## Deploy on Vercel
+```typescript
+interface TypingTypeInterface {
+  id: number;
+  title: string;
+  author: string;
+  content: string;       // 필사할 텍스트
+  compiler?: string;     // 엮은이
+  color: string;         // 표지 색상 (hex)
+  genre: 'novel' | 'poem' | 'essay' | 'quote';
+  difficulty?: 'easy' | 'medium' | 'hard';
+  tag?: string[];
+}
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+| 필드 | 설명 |
+|------|------|
+| `content` | 실제 필사할 텍스트 전문 |
+| `genre` | 장르에 따라 문장 분리 방식이 다름 — 소설/수필은 `.` 기준, 시는 `\n` 기준, 명언은 단일 블록 |
+| `color` | UI에서 작품별 표지 색상으로 사용 |
+| `difficulty` | 난이도 (선택) |
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 라이선스
+
+MIT License
