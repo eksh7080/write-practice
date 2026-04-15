@@ -48,3 +48,6 @@ Dockerfile
 
 # Claude Code
 .claude/settings.json
+
+# 데모 원본 (용량 큼, GIF만 커밋)
+assets/*.mp4

@@ -7,7 +7,7 @@
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript)
 ![SCSS](https://img.shields.io/badge/SCSS-Modules-CC6699?logo=sass)
 
-<!-- 스크린샷 추가 예정 -->
+![필사 타자연습 데모](assets/demo.gif)
 
 ## 주요 기능
 
